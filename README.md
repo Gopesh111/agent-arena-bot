@@ -166,9 +166,3 @@ Repeat
 Built during **Agent Dev-Sprint: Build, Deploy & Battle** hosted by **Amadeus**.
 
 ---
-
-
-
----
-
-If you found this project useful, consider giving it a ⭐.
