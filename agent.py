@@ -71,9 +71,9 @@ MCP_ENDPOINT = "https://agent-arena.dev/mcp"
 
 ID_TOKEN = os.environ.get("ID_TOKEN", "")
 
-AGENT_NAME    = "xpribot-v2"
-LINKEDIN_URL  = "https://www.linkedin.com/in/xprilion"
-GITHUB_URL    = "https://github.com/xprilion/agent-arena-bot"
+AGENT_NAME    = "ThirdSight Prime"
+LINKEDIN_URL  = "https://www.linkedin.com/in/gopesh-pandey-50a601258/"
+GITHUB_URL    = "https://github.com/Gopesh111/agent-arena-bot.git"
 GEMINI_MODEL   = "gemini-3-flash-preview"
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 TRACELOOP_API_KEY = os.environ.get("TRACELOOP_API_KEY", "")
@@ -101,7 +101,10 @@ def _active_model_name() -> str:
     return GEMINI_MODEL
 
 
-AGENT_STACK = f"Python / Google ADK / {_active_model_name()} / Traceloop"
+AGENT_STACK = (
+    f"Python • Google ADK • {_active_model_name()} • "
+    "Adaptive Prompting • Self-Reflection • MCP • Traceloop"
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -171,7 +174,11 @@ class RunState:
                 f"  {icon} L{entry['level']}  {entry['task'][:40]:<40}  {entry['score']:>3}/100"
             )
         lines.append(f"{'─'*60}\n")
+        lines.append(f"  Agent Name    : {AGENT_NAME}")
+        lines.append(f"  Agent Stack   : {AGENT_STACK}")
+        lines.append(f"  Model         : {_active_model_name()}")
         return "\n".join(lines)
+    
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -346,6 +353,10 @@ def make_tools(state: RunState) -> list:
             "metadata": {
                 "agent_name": AGENT_NAME, "agent_stack": AGENT_STACK,
                 "run_id": state.run_id, "execution_id": new_exec, "model": _active_model_name(),
+                "agent_version": "2.0",
+"reasoning_mode": "Adaptive Reflection",
+"developer": "Gopesh Pandey",
+
             },
         }, state)
 
@@ -398,6 +409,8 @@ CORE PRINCIPLES:
 2. QUALITY: Aim for 90+/100. Incomplete or shallow answers score poorly.
 3. AUTONOMY: Do not ask for clarification. Make reasonable assumptions and state them.
 4. ADAPTABILITY: Follow the specific instructions in each user message precisely.
+5. SELF-CRITIQUE: Review your own answer before submitting and improve weak sections.
+6. EXECUTION QUALITY: Never submit the first draft if it can be improved.
 
 RULES:
 - Never submit the same task_id twice.
@@ -418,7 +431,7 @@ def build_agent(state: RunState) -> LlmAgent:
         instruction=SYSTEM_PROMPT,
         tools=make_tools(state),
         generate_content_config=genai_types.GenerateContentConfig(
-            temperature=0.3,
+            temperature=0.2,
             max_output_tokens=8192,
         ),
     )
@@ -474,13 +487,26 @@ async def run_turn(
 async def run() -> None:
     state = RunState()
 
-    print(f"\n{'═'*60}")
-    print(f"  AGENT ARENA  —  {_active_model_name()}")
-    print(f"{'═'*60}")
+    print("""
+████████╗██╗  ██╗██╗██████╗ ██████╗ ███████╗██╗ ██████╗ ██╗  ██╗████████╗
+╚══██╔══╝██║  ██║██║██╔══██╗██╔══██╗██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
+   ██║   ███████║██║██████╔╝██║  ██║███████╗██║██║  ███╗███████║   ██║
+   ██║   ██╔══██║██║██╔══██╗██║  ██║╚════██║██║██║   ██║██╔══██║   ██║
+   ██║   ██║  ██║██║██║  ██║██████╔╝███████║██║╚██████╔╝██║  ██║   ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+
+          ThirdSight Prime • Autonomous Reasoning Agent
+""")
+
+    print(f"Model : {_active_model_name()}")
+    print(f"Run ID: {state.run_id}")
+    print(f"{'═' * 60}")
+
     _log("REGISTER", f"Agent: {AGENT_NAME}")
     _log("REGISTER", f"Run ID: {state.run_id}")
     _log("REGISTER", f"Max tasks: {MAX_TASKS}")
-    print(f"{'═'*60}\n")
+
+    print(f"{'═' * 60}\n")
 
     set_association_properties({
         "run.id":       state.run_id,
@@ -533,13 +559,16 @@ async def run() -> None:
 
         print(f"\n{'━'*60}")
         _log("TASK", f"#{task_num} | {task_title}")
-        _log("TASK", f"Type: {task_type.upper()} | Level: {task.get('level', '?')} | ID: {state.task_id[:8]}")
+        _log("TASK", f"🧠 Reasoning Mode: {task_type.upper()} | Level: {task.get('level', '?')} | ID: {state.task_id[:8]}")
+        _log("AGENT", "🧠 Planning strategy...")
+        _log("AGENT", "⚙ Generating solution...")
+        _log("AGENT", "🔍 Performing self-review...")
         _log("TASK", f"Desc: {desc}{'...' if len(task.get('description', '')) > 600 else ''}")
         print(f"{'━'*60}")
 
         # ── Single-turn solve ─────────────────────────────────────────────────
         prompt = build_task_prompt(task, state.agent_id, state.task_id)
-        _log("AGENT", "Solving task (analysis + solution + submit in one turn)...")
+        _log("AGENT", "🧠 Planning → ⚙ Solving → 🔍 Self-Review → 🚀 Submitting...")
         await run_turn(runner, session_service, state.run_id, prompt)
 
         # ── Verify submission ─────────────────────────────────────────────────
@@ -594,6 +623,7 @@ async def run() -> None:
         "total_score":     state.total_score,
         "tasks_attempted": state.tasks_attempted,
         "final_level":     state.current_level,
+        
     })
 
 
