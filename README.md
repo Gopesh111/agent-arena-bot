@@ -129,24 +129,35 @@ python agent.py
 
 ## Workflow
 
-```
+```text
+Start
+  │
+  ▼
 Register Agent
-      │
+  │
+  ▼
 Fetch Task
-      │
-Analyze
-      │
+  │
+  ▼
+Classify Task
+  │
+  ▼
 Plan
-      │
+  │
+  ▼
 Reason
-      │
-Use Tools
-      │
-Review
-      │
+  │
+  ▼
+Tool Calling
+  │
+  ▼
+Self Review
+  │
+  ▼
 Submit
-      │
-Repeat
+  │
+  ▼
+Next Task
 ```
 
 ---
